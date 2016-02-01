@@ -1,0 +1,8 @@
+# Managed by config management
+{% set transport = salt['pillar.get']('postfix:transport',{}) -%}
+{% if transport is iterable -%}
+  {% for key,value in salt['pillar.get']('postfix:transport',{}).iteritems() -%}
+    {{ key }}  {{ value }}
+  {% endfor %}
+{% endif %}
+

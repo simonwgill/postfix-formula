@@ -12,16 +12,19 @@ postfix:
     - watch:
       - pkg: postfix
 
-{%- macro postmap_file(filename, mode=644) %}
+{%- macro postmap_file(filename, mode=644, sourcefile='') %}
+{%- set sourcefile = filename if sourcefile == '' else sourcefile %}
 {%- set file_path = '/etc/postfix/' ~ filename %}
 postmap_{{ filename }}:
   file.managed:
     - name: {{ file_path }}
-    - source: salt://postfix/{{ filename }}
+    - source: salt://postfix/{{ sourcefile }}
     - user: root
     - group: root
     - mode: {{ mode }}
     - template: jinja
+    - context:
+      filename: {{ filename }}
     - require:
       - pkg: postfix
   cmd.wait:
@@ -65,3 +68,16 @@ run-newaliases:
 {% if 'sender_canonical' in pillar.get('postfix', '') %}
 {{ postmap_file('sender_canonical') }}
 {% endif %}
+
+# manage transport configurations if data found in pillar
+{% if 'transport' in pillar.get('postfix', '') %}
+{{ postmap_file('transport') }}
+{% endif %}
+
+# manage ldap configurations if data found in pillar
+{% if 'ldap' in pillar.get('postfix', '') %}
+{% for filename in pillar.get('postfix').get('ldap', {}).keys()  %}
+{{ postmap_file(filename, sourcefile='ldap') if filename != 'common' else '' }}
+{% endfor %}
+{% endif %}
+

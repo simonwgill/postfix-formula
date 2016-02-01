@@ -1,0 +1,9 @@
+# Managed by configuration managment
+{% set common = salt['pillar.get']('postfix:ldap:common',{}) -%}
+{% set values = salt['pillar.get']('postfix:ldap:' ~ filename, common, merge=True) -%}
+{% if values is iterable -%}
+{% for key,value in values.items() -%}
+{{ key }} = {{ value }}
+{% endfor -%}
+{% endif %}
+

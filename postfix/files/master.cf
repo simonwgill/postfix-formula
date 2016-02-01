@@ -135,3 +135,9 @@ scache    unix  -       -       n       -       1       scache
 policy-spf  unix  -       n       n       -       -       spawn
   user=nobody argv=/usr/bin/policyd-spf
 {%- endif %}
+{% set services = salt['pillar.get']('postfix:master_config:services', {}) %}
+{% for service_name in services.keys() -%}
+{% set service = services.get(service_name) -%}
+{{ service_name }}  {{ service.get('service_type', '-') }}  {{ service.get('private', '-') }}  {{service.get('unprivileged', '-') }}  {{ service.get('chroot', '-') }}  {{ service.get('wake_up_time', '-') }}  {{ service.get('process_limit', '-') }}  {{ service.get('command', '') }}
+{%- endfor %}
+
